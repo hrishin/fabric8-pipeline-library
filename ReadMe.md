@@ -215,8 +215,8 @@ NOTE:  if `cmd` is set, `goal`, `profile`, `skipTests` will have no effect.
 - pass `cmd` parameter to override the `mvn` command to execute in integration test
 ```groovy
     mavenIntegrationTest {
-      integrationTestCmd = 'mvn -P openshift-it org.apache.maven.plugins:maven-failsafe-plugin:verify'
-    } 
+      cmd = 'mvn -P openshift-it org.apache.maven.plugins:maven-failsafe-plugin:verify'
+    }
 ```
 Note: All other flags are ignored if `mavenIntegrationTest` has `integrationTestCmd` parameter.
 #### Merge and Wait for Pull Request

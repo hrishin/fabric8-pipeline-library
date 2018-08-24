@@ -63,7 +63,7 @@ def call(body) {
 
         stage('Integration Testing') {
             mavenIntegrationTest {
-                integrationTestCmd = config.integrationTestCmd
+                cmd = config.integrationTestCmd
                 environment = 'Test'
                 failIfNoTests = false
                 itestPattern = '*IT'

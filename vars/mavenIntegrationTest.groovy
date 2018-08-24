@@ -1,10 +1,10 @@
 #!/usr/bin/groovy
+
 import io.fabric8.Utils
 
 def call(body) {
-    def utils = new Utils()
 
-    if (utils.isDisabledITests()) {
+    if (new Utils().isDisabledITests()) {
         echo "WARNING: Integration tests DISABLED for these pipelines!"
         return
     }
@@ -15,10 +15,18 @@ def call(body) {
     body.delegate = config
     body()
 
+    def cmd = config.cmd ?: defaultTestCommand(config)
+    sh cmd
+    junitResults(body);
+}
+
+def defaultTestCommand(config) {
+    def utils = new Utils()
+
     def envName = config.environment
     def kubeNS = "-Dfabric8.environment=${envName}"
 
-    if (envName && !config.integrationTestCmd) {
+    if (envName) {
         try {
             def ns = utils.environmentNamespace(envName)
             if (ns) {
@@ -27,12 +35,12 @@ def call(body) {
             }
         } catch (e) {
             echo "ERROR: failed to find the environment namespace for ${envName} due to ${e}"
-            e.printStackTrace()
         }
     }
 
-    def testCmd = config.integrationTestCmd ?: "mvn org.apache.maven.plugins:maven-failsafe-plugin:integration-test -P openshift-it ${kubeNS} -Dit.test=${config.itestPattern} -DfailIfNoTests=${config.failIfNoTests} org.apache.maven.plugins:maven-failsafe-plugin:verify"
-    sh testCmd
-    junitResults(body);
-
+    return "mvn \
+     org.apache.maven.plugins:maven-failsafe-plugin:integration-test \
+     org.apache.maven.plugins:maven-failsafe-plugin:verify \
+     -P openshift-it ${kubeNS} \
+     -Dit.test=${config.itestPattern} -DfailIfNoTests=${config.failIfNoTests}"
 }
