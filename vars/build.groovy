@@ -6,7 +6,7 @@ def call(Map args) {
     stage("Build application") {
         if(args.container) {
             echo "$args"
-            shell(image: "$args.container.image", version: "$args.container.version") {
+            spawn(image: $args.container.image, version: $args.container.version) {
                 build(args)
             }
         } else {
