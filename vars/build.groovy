@@ -5,7 +5,8 @@ import io.fabric8.Utils
 def call(Map args) {
     stage("Build application") {
         if(args.container) {
-            shell image: args.container.image, version: args.container.image {
+            echo "$args"
+            shell image: args.container.image, version: args.container.version {
                 build(args)
             }
         } else {
