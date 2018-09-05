@@ -1,7 +1,6 @@
 #!/usr/bin/groovy
 import io.fabric8.Events
 import io.fabric8.Utils
-import groovy.json.*
 
 
 def call(Map args) {
@@ -41,13 +40,13 @@ def buildProject(buildConfig, namespace) {
 
 def shWithOutput(String command) {
     return sh(
-            script: command,
-            returnStdout: true
+        script: command,
+        returnStdout: true
     ).trim()
 }
 
 def ocApplyResource(resource, namespace) {
-    def resourceFile = ".openshiftio/.tmp-${resource.kind.toLowerCase()}.yaml"
+    def resourceFile = ".openshiftio/.tmp-${namespace}-${env.BUILD_NUMBER}-${resource.kind.toLowerCase()}.yaml"
     writeYaml file: resourceFile, data: resource
-    sh "oc apply -n ${namespace} -f $resourceFile"
+    sh "oc apply -f $resourceFile -n $namespace"
 }
