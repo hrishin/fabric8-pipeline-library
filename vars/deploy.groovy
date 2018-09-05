@@ -43,11 +43,10 @@ def tagImageToDeployEnv(deployNamespace, userNamespace, is, tag) {
 }
 
 def deployEnvironment(deployNamespace, dc, service, route) {
-    def util = new Utils()
-    util.ocApplyResource(dc, deployNamespace)
+    ocApplyResource(dc, deployNamespace)
     openshiftVerifyDeployment(depCfg: "${dc.metadata.name}", namespace: "${deployNamespace}")
-    util.ocApplyResource(service, deployNamespace)
-    util.ocApplyResource(route, deployNamespace)
+    ocApplyResource(service, deployNamespace)
+    ocApplyResource(route, deployNamespace)
     return displayRouteURL(deployNamespace, route)
 
 }
@@ -75,9 +74,9 @@ def displayRouteURL(namespace, route) {
 }
 
 def ocApplyResource(resource, namespace) {
-    def resourceFile = ".openshiftio/.tmp-${resource.kind.toLowerCase()}.yaml"
+    def resourceFile = ".openshiftio/.tmp-${namespace}-${env.BUILD_NUMBER}-${resource.kind.toLowerCase()}.yaml"
     writeYaml file: resourceFile, data: resource
-    sh "oc apply -f ${resourceFile} -n ${namespace}"
+    sh "oc apply -f $resourceFile -n $namespace"
 }
 
 def shWithOutput(String command) {

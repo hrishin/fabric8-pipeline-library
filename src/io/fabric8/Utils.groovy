@@ -623,11 +623,4 @@ def getOpenShiftBuildName() {
     return null
 }
 
-@NonCPS
-def ocApplyResource(resource, namespace) {
-    def resourceFile = ".openshiftio/.tmp-${namespace}-${env.BUILD_NUMBER}-${resource.kind.toLowerCase()}.yaml"
-    writeYaml file: resourceFile, data: resource
-    sh "oc apply -n ${namespace} -f $resourceFile"
-}
-
 return this

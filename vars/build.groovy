@@ -7,12 +7,11 @@ def call(Map args) {
     stage("Build application") {
         Events.emit("build.start")
         def status = ""
-        def util = new Utils()
-        def namespace = args.namespace ?: util.getUsersNamespace()
+        def namespace = args.namespace ?: new Utils().getUsersNamespace()
 
         try {
-            createImageStream(args.app.ImageStream, namespace, util)
-            buildProject(args.app.BuildConfig, namespace, util)
+            createImageStream(args.app.ImageStream, namespace)
+            buildProject(args.app.BuildConfig, namespace)
             status = "pass"
         } catch (e) {
             status = "fail"
@@ -24,24 +23,30 @@ def call(Map args) {
     }
 }
 
-def createImageStream(imageStream, namespace, util) {
+def createImageStream(imageStream, namespace) {
     def isName = imageStream.metadata.name
     def isFound = shWithOutput("oc get is/$isName -n $namespace --ignore-not-found")
     if (!isFound) {
-        util.ocApplyResource(imageStream, namespace)
+        ocApplyResource(imageStream, namespace)
     } else {
         echo "image stream exist ${isName}"
     }
 }
 
-def buildProject(buildConfig, namespace, util) {
-    util.ocApplyResource(buildConfig, namespace)
+def buildProject(buildConfig, namespace) {
+    ocApplyResource(buildConfig, namespace)
     openshiftBuild(buildConfig: "${buildConfig.metadata.name}", showBuildLogs: 'true')
 }
 
 def shWithOutput(String command) {
     return sh(
-            script: command,
-            returnStdout: true
+        script: command,
+        returnStdout: true
     ).trim()
+}
+
+def ocApplyResource(resource, namespace) {
+    def resourceFile = ".openshiftio/.tmp-${namespace}-${env.BUILD_NUMBER}-${resource.kind.toLowerCase()}.yaml"
+    writeYaml file: resourceFile, data: resource
+    sh "oc apply -f $resourceFile -n $namespace"
 }
