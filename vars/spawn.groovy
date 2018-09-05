@@ -2,7 +2,7 @@
 
 def call(Map args = [:], body = null){
     def spec = specForImage(args.image, args.version?: 'latest')
-    pod(name: args.image, image: spec.image, shell: spec.shell) {
+    pod(name: getValidName(args.image), image: spec.image, shell: spec.shell) {
       body()
     }
 }
@@ -30,4 +30,10 @@ def specForImage(image, version){
 
   // TODO: validate image in specs
   return specs[image][version]
+}
+
+def getValidName(image) {
+    image = image.replaceAll("/", "-").toLowerCase()
+    image = image.replaceAll(/[^a-z0-9\.-]/, "")
+    return image
 }
