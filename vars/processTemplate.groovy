@@ -3,9 +3,8 @@
 def call(Map params, String yamlFile = ".openshiftio/application.yaml") {
     echo "$yamlFile"
     if (!fileExists(yamlFile)) {
-        println("File not found: ${yamlFile}")
         currentBuild.result = 'FAILURE'
-        return
+        error("File not found: ${yamlFile}")
     }
 
     def args = [:]
